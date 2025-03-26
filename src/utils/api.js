@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:3001/api"; // Your backend URL
+const API_URL = "https://moanhard-backend.vercel.app/"; // Your backend URL
 
 export const requestDrip = async (address) => {
     const response = await fetch(`${API_URL}/drip`, {
