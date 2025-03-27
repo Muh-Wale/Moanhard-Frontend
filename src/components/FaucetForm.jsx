@@ -11,24 +11,25 @@ export default function FaucetForm() {
     const [cooldown, setCooldown] = useState(0);
     const [showCelebration, setShowCelebration] = useState(false);
     const [hasClaimed, setHasClaimed] = useState(false);
-    const [audio] = useState(new Audio(celebrationSound)); // Store audio instance
+    const [audio] = useState(new Audio(celebrationSound));
 
     useEffect(() => {
         if (showCelebration) {
-            audio.loop = true; // Enable looping
+            // Allow autoplay only after user interaction
+            audio.loop = true;
             audio.play().catch((err) => console.error("Audio play error:", err));
         } else {
             audio.pause();
-            audio.currentTime = 0; // Reset audio when stopped
+            audio.currentTime = 0;
         }
 
         return () => {
             audio.pause();
-            audio.currentTime = 0; // Ensure it stops when component unmounts
+            audio.currentTime = 0;
         };
-    }, [showCelebration, audio]);
+    }, [showCelebration]);
 
-    const handleSubmit = async (e) => {
+    const handleClaim = async (e) => {
         e.preventDefault();
         setIsLoading(true);
         setMessage("");
@@ -45,7 +46,10 @@ export default function FaucetForm() {
                 setMessage("✅ 0.01 MON sent successfully!");
                 setCooldown(24 * 60 * 60);
                 setShowCelebration(true);
-                setHasClaimed(true); // Hide the form after claiming
+                setHasClaimed(true);
+
+                // Start the audio ONLY when user clicks the claim button
+                audio.play().catch((err) => console.error("Audio play error:", err));
             } else {
                 setMessage(`❌ Error: ${result.error}`);
             }
@@ -60,10 +64,10 @@ export default function FaucetForm() {
         <div className="flex items-center justify-center min-h-screen">
             {showCelebration && <Celebration />}
 
-            {!hasClaimed && ( // Hide the form if faucet is claimed
+            {!hasClaimed && (
                 <div className="bg-white/20 backdrop-blur-lg shadow-lg rounded-2xl p-4 md:p-6 w-full max-w-md relative">
                     <h1 className="text-3xl font-extrabold text-white text-center mb-6">Monad Faucet</h1>
-                    <form onSubmit={handleSubmit} className="space-y-5">
+                    <form onSubmit={handleClaim} className="space-y-5">
                         <div>
                             <label htmlFor="address" className="block text-white text-sm font-semibold mb-2">
                                 Your MON Address
@@ -74,11 +78,11 @@ export default function FaucetForm() {
                                 value={address}
                                 onChange={(e) => setAddress(e.target.value)}
                                 placeholder="0x..."
-                                className="w-full p-4 text-white bg-white/10 border border-white/20 rounded-lg focus:ring-4 focus:ring-indigo-400 outline-none backdrop-blur-sm"
+                                className="w-full p-4 text-gray-800 bg-white/10 border border-white/20 rounded-lg focus:ring-4 focus:ring-indigo-400 outline-none backdrop-blur-sm"
                                 required
                             />
                         </div>
-                        {isLoading ? "" : <p className="capitalize italic text-center text-base md:text-xl text-white">Increase Your Volume To Claim</p>}
+                        {!isLoading && <p className="capitalize italic text-center text-base md:text-xl text-white">Increase Your Volume To Claim</p>}
                         <button
                             type="submit"
                             disabled={isLoading}
